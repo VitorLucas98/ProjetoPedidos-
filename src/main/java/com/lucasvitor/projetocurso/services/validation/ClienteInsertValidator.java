@@ -6,8 +6,12 @@ import java.util.List;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.lucasvitor.projetocurso.domain.Cliente;
 import com.lucasvitor.projetocurso.domain.enums.TipoCliente;
 import com.lucasvitor.projetocurso.dto.ClienteNewDTO;
+import com.lucasvitor.projetocurso.repositories.ClienteRepository;
 import com.lucasvitor.projetocurso.resources.exception.FieldMessage;
 import com.lucasvitor.projetocurso.services.validation.utils.BR;
 
@@ -18,6 +22,9 @@ public class ClienteInsertValidator implements ConstraintValidator<ClienteInsert
 	@Override
 	public void initialize(ClienteInsert ann) {
 	}
+	
+	@Autowired
+	private ClienteRepository repo;
 
 	@Override
 	public boolean isValid(ClienteNewDTO objDto, ConstraintValidatorContext context) {
@@ -30,6 +37,11 @@ public class ClienteInsertValidator implements ConstraintValidator<ClienteInsert
 
 		if (objDto.getTipo().equals(TipoCliente.PESSOAJURIDICA.getCod()) && !BR.isValidCNPJ(objDto.getCpfOuCnpj())) {
 			list.add(new FieldMessage("cpfOuCnpj", "CNPJ inválido"));
+		}
+		
+		Cliente aux = repo.findByEmail(objDto.getEmail());
+		if (aux != null) {
+			list.add(new FieldMessage("email", "Email já existente"));
 		}
 
 		for (FieldMessage e : list) {
