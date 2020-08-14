@@ -2,13 +2,16 @@ package com.lucasvitor.projetocurso.dto;
 
 import java.io.Serializable;
 
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 import org.hibernate.validator.constraints.Length;
 
 import com.lucasvitor.projetocurso.domain.Cliente;
+import com.lucasvitor.projetocurso.services.validation.ClienteUpdate;
 
+@ClienteUpdate
 public class ClienteDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
