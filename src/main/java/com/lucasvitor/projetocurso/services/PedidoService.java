@@ -4,8 +4,12 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
+import com.lucasvitor.projetocurso.domain.Cliente;
 import com.lucasvitor.projetocurso.domain.ItemPedido;
 import com.lucasvitor.projetocurso.domain.PagamentoComBoleto;
 import com.lucasvitor.projetocurso.domain.Pedido;
@@ -13,6 +17,8 @@ import com.lucasvitor.projetocurso.domain.enums.EstadoPagamento;
 import com.lucasvitor.projetocurso.repositories.ItemPedidoRepository;
 import com.lucasvitor.projetocurso.repositories.PagamentoRepository;
 import com.lucasvitor.projetocurso.repositories.PedidoRepository;
+import com.lucasvitor.projetocurso.security.UserSS;
+import com.lucasvitor.projetocurso.services.exceptions.AuthorizationException;
 import com.lucasvitor.projetocurso.services.exceptions.ObjectNotFoundException;
 
 @Service
@@ -66,6 +72,16 @@ public class PedidoService {
 		itemPedidoRepository.saveAll(obj.getItens());
 		emailService.sendOrderConfirmationHtmlEmail(obj);
 		return obj;
+	}
+	
+	public Page<Pedido> findPage(Integer page, Integer linesPerPage, String orderBy, String direction) {
+		UserSS user = UserService.authenticated();
+		if (user == null) {
+			throw new AuthorizationException("Acesso negado");
+		}
+		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
+		Cliente cliente =  clienteService.find(user.getId());
+		return repo.findByCliente(cliente, pageRequest);
 	}
 
 }
